@@ -87,6 +87,7 @@ public slots:
 	void importToCurrentMap();
 	void varManager();
 	void runFF7();
+	void attachDuckStation();
 	void textManager(int textID=-1, int from=0, int size=0, bool activate=true);
 	void modelManager();
 	void encounterManager();

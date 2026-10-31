@@ -73,7 +73,7 @@ add_compile_definitions(
     MAKOU_REACTOR_VERSION_TWEAK=0
 )
 
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets OpenGLWidgets Svg OpenGL LinguistTools Core5Compat Xml Quick REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets OpenGLWidgets Svg OpenGL LinguistTools Core5Compat Xml Quick Network REQUIRED)
 find_package(ZLIB REQUIRED)
 
 set(REQUIRED_FF7TK_VERSION 1.2.0)
@@ -102,6 +102,8 @@ set(PROJECT_SOURCES
     "src/core/Clipboard.h"
     "src/core/Config.cpp"
     "src/core/Config.h"
+    "src/core/DuckStation.cpp"
+    "src/core/DuckStation.h"
     "src/core/CsvFile.cpp"
     "src/core/CsvFile.h"
     "src/core/FF7Font.cpp"
@@ -518,6 +520,7 @@ if(GUI)
         Qt::Widgets
         Qt::OpenGLWidgets
         Qt::Svg
+        Qt::Network
         ZLIB::ZLIB
         ff7tk::ff7tk
         ff7tk::ff7tkData

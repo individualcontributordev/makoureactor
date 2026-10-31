@@ -21,6 +21,7 @@
 #include "CLI.h"
 #else
 #include <QApplication>
+#include <QFontDatabase>
 #include "Window.h"
 #include "core/Var.h"
 #include "Data.h"
@@ -49,6 +50,14 @@ int main(int argc, char *argv[])
 
 	QApplication app(argc, argv);
 	app.setWindowIcon(QIcon(":/images/logo-shinra.png"));
+
+	for (const QString &style : QStringList{"Regular", "Bold", "Italic", "BoldItalic"}) {
+		QFontDatabase::addApplicationFont(QStringLiteral(":/fonts/AtkinsonHyperlegible-%1.ttf").arg(style));
+	}
+	QFont font = app.font();
+	font.setFamily("Atkinson Hyperlegible");
+	font.setPointSizeF(font.pointSizeF() + 1); // Atkinson reads smaller than the system default
+	app.setFont(font);
 
 	QSurfaceFormat format;
 	format.setOption(QSurfaceFormat::DeprecatedFunctions, false);

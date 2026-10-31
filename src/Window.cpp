@@ -27,6 +27,7 @@
 #include "widgets/PsfDialog.h"
 #include "widgets/AboutDialog.h"
 #include "core/Config.h"
+#include "core/DuckStation.h"
 #include "Data.h"
 #include "core/field/FieldArchivePC.h"
 #include "core/field/FieldArchivePS.h"
@@ -108,7 +109,7 @@ Window::Window() :
 	actionRun = fileMenu->addAction(QIcon::fromTheme(QStringLiteral("ff7")), tr("R&un FF7"), this, &Window::runFF7);
 	actionRun->setShortcut(Qt::Key_F8);
 	actionRun->setShortcutContext(Qt::ApplicationShortcut);
-	actionRun->setEnabled(!Data::ff7AppPath().isEmpty());
+	actionRun->setEnabled(DuckStation::attached() || !Data::ff7AppPath().isEmpty());
 	fileMenu->addSeparator();
 	actionClose = fileMenu->addAction(QIcon::fromTheme(QStringLiteral("document-close")), tr("C&lose"), this, &Window::closeFile);
 	fileMenu->addAction(QIcon::fromTheme(QStringLiteral("application-exit")), tr("E&xit"), QKeySequence::Quit, this, &Window::close)->setMenuRole(QAction::QuitRole);
@@ -158,6 +159,7 @@ Window::Window() :
 	connect(menuLang, &QMenu::triggered, this, &Window::changeLanguage);
 
 	menu->addAction(QIcon::fromTheme(QStringLiteral("configure")), tr("&Configuration..."), this, &Window::config)->setMenuRole(QAction::PreferencesRole);
+	menu->addAction(tr("Attach to &DuckStation..."), this, &Window::attachDuckStation);
 
 	/* Toolbar */
 	toolBar = new QToolBar(tr("Main &toolbar"));
@@ -1218,6 +1220,11 @@ void Window::saveAs(bool currentPath)
 		}
 	}
 
+	if (path.isEmpty() && DuckStation::attached() && fieldArchive->io()->type() == FieldArchiveIO::Iso) {
+		QString ignored; // DuckStation locks the open image; fine if nothing is running
+		DuckStation::shutdown(ignored);
+	}
+
 	showProgression(tr("Saving..."), fieldArchive->io()->type() == FieldArchiveIO::Lgp);
 	quint8 error = 0;
 	
@@ -1596,8 +1603,51 @@ void Window::varManager()
 	varDialog->show();
 }
 
+void Window::attachDuckStation()
+{
+	bool ok;
+	const QString url = QInputDialog::getText(this, tr("Attach to DuckStation"),
+	                                          tr("DuckStation MCP server URL (empty to detach):"),
+	                                          QLineEdit::Normal,
+	                                          DuckStation::attached() ? DuckStation::url() : QStringLiteral("http://localhost:2346/mcp"),
+	                                          &ok).trimmed();
+	if (!ok) {
+		return;
+	}
+
+	DuckStation::setUrl(url);
+	if (!url.isEmpty()) {
+		QString server, error;
+		if (DuckStation::connect(server, error)) {
+			QMessageBox::information(this, tr("Attach to DuckStation"), tr("Attached to %1.\nF8 now reloads the image in DuckStation.").arg(server));
+		} else {
+			QMessageBox::warning(this, tr("Attach to DuckStation"), tr("Could not reach DuckStation (kept anyway):\n%1").arg(error));
+		}
+	}
+	actionRun->setEnabled(DuckStation::attached() || !Data::ff7AppPath().isEmpty());
+}
+
 void Window::runFF7()
 {
+	if (DuckStation::attached()) {
+		if (!fieldArchive || fieldArchive->io()->type() != FieldArchiveIO::Iso) {
+			QMessageBox::warning(this, tr("Error"), tr("Open a disc image (.bin) to run it in DuckStation."));
+			return;
+		}
+		if (isWindowModified()) {
+			save();
+			if (isWindowModified()) { // compile or save failed
+				return;
+			}
+		}
+		QString error;
+		DuckStation::shutdown(error); // fine if nothing is running
+		if (!DuckStation::boot(fieldArchive->io()->path(), error)) {
+			QMessageBox::warning(this, tr("Error"), tr("DuckStation couldn't boot the image:\n%1").arg(error));
+		}
+		return;
+	}
+
 	QString FF7Exe = Data::ff7AppPath();
 	QString FF7ExeDir = FF7Exe.left(FF7Exe.lastIndexOf('/'));
 	QStringList args;
@@ -1884,7 +1934,7 @@ void Window::config()
 		if (_textDialog) {
 			_textDialog->updateText();
 		}
-		actionRun->setEnabled(!Data::ff7AppPath().isEmpty());
+		actionRun->setEnabled(DuckStation::attached() || !Data::ff7AppPath().isEmpty());
 		_scriptManager->fillOpcodes();
 	}
 }
