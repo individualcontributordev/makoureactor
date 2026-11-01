@@ -45,6 +45,9 @@ OpcodeList::OpcodeList(QWidget *parent) :
 	add_A = new QAction(QIcon::fromTheme(QStringLiteral("list-add")), tr("Add"), this);
 	add_A->setShortcut(QKeySequence("Ctrl++"));
 	add_A->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+	addGoto_A = new QAction(tr("Add goto new label"), this);
+	addGoto_A->setShortcut(QKeySequence("Ctrl+Shift+L"));
+	addGoto_A->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 	del_A = new QAction(QIcon::fromTheme(QStringLiteral("list-remove")), tr("Delete"), this);
 	del_A->setShortcut(QKeySequence(Qt::Key_Delete));
 	del_A->setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -91,6 +94,7 @@ OpcodeList::OpcodeList(QWidget *parent) :
 
 	connect(edit_A, &QAction::triggered, this, &OpcodeList::scriptEditor);
 	connect(add_A, &QAction::triggered, this, &OpcodeList::add);
+	connect(addGoto_A, &QAction::triggered, this, &OpcodeList::addGotoNewLabel);
 	connect(del_A, &QAction::triggered, this, &OpcodeList::del);
 	connect(cut_A, &QAction::triggered, this, &OpcodeList::cut);
 	connect(copy_A, &QAction::triggered, this, &OpcodeList::copy);
@@ -108,6 +112,7 @@ OpcodeList::OpcodeList(QWidget *parent) :
 
 	addAction(edit_A);
 	addAction(add_A);
+	addAction(addGoto_A);
 	addAction(del_A);
 	addAction(text_A);
 	addAction(goto_A);
@@ -821,6 +826,51 @@ void OpcodeList::scriptEditor(bool modify)
 		}
 	}
 
+	emit changed();
+}
+
+void OpcodeList::addGotoNewLabel()
+{
+	if (_field == nullptr || _grpScript == nullptr || _script == nullptr
+	        || _field->scriptsAndTexts() == nullptr) {
+		return;
+	}
+
+	int opcodeID = selectedID();
+	if (opcodeID <= -1 || opcodeID >= _script->size()) {
+		opcodeID = -1;
+	}
+	++opcodeID;
+
+	// Same numbering as "New label" in the script editor
+	quint16 newLabel = 1;
+	for (const Opcode &op : _script->opcodes()) {
+		if (op.id() == OpcodeKey::LABEL && op.label() >= newLabel) {
+			newLabel = quint16(op.label() + 1);
+		}
+	}
+
+	saveExpandedItems();
+
+	QByteArray raw(Opcode::length[OpcodeKey::JMPF], '\x00');
+	raw[0] = char(OpcodeKey::JMPF);
+	Opcode jump(raw.constData(), raw.size());
+	jump.setLabel(newLabel);
+	jump.setBadJump(BadJumpError::Ok);
+	OpcodeLABEL label;
+	label._label = newLabel;
+
+	_script->insertOpcode(opcodeID, jump);
+	_script->insertOpcode(opcodeID + 1, label);
+
+	fill();
+	QTreeWidgetItem *item = findItem(opcodeID);
+	if (item != nullptr) {
+		setCurrentItem(item);
+		scrollToItem(item, QAbstractItemView::EnsureVisible);
+	}
+
+	changeHist(Add, QList<int>() << opcodeID << (opcodeID + 1));
 	emit changed();
 }
 

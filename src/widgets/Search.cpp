@@ -414,6 +414,13 @@ void Search::setText(const QString &text)
 	champ2->setEditText(text);
 }
 
+void Search::showScriptSearchInCurrentField(int module)
+{
+	tabWidget->setCurrentIndex(0); // Script
+	liste->setCurrentIndex(module);
+	currentFieldCheckBox->setChecked(true);
+}
+
 void Search::setScriptExec(int groupID, int scriptID)
 {
 	if (groupID >= 0) {

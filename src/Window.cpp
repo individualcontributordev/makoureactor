@@ -126,6 +126,8 @@ Window::Window() :
 	menu->addSeparator();
 	menu->addAction(tr("Variable Mana&ger..."), QKeySequence("Ctrl+G"), this, &Window::varManager);
 	actionFind = menu->addAction(QIcon::fromTheme(QStringLiteral("edit-find")), tr("&Find..."), QKeySequence::Find, this, &Window::searchManager);
+	menu->addAction(tr("Find &text in map..."), QKeySequence("Ctrl+Shift+F"), this, &Window::searchTextInField);
+	menu->addAction(tr("Find &run in map..."), QKeySequence("Ctrl+Shift+R"), this, &Window::searchRunInField);
 	actionMiscOperations = menu->addAction(tr("B&atch processing..."), this, &Window::miscOperations);
 
 	/* "Settings" Menu */
@@ -1682,6 +1684,18 @@ void Window::searchManager()
 	searchDialog->show();
 	searchDialog->activateWindow();
 	searchDialog->raise();
+}
+
+void Window::searchTextInField()
+{
+	searchManager();
+	searchDialog->showScriptSearchInCurrentField(0); // Text
+}
+
+void Window::searchRunInField()
+{
+	searchManager();
+	searchDialog->showScriptSearchInCurrentField(3); // Run
 }
 
 void Window::searchOpcode(int opcodeID)

@@ -96,6 +96,8 @@ public slots:
 	void backgroundManager();
 	void miscManager();
 	void searchManager();
+	void searchTextInField();
+	void searchRunInField();
 	void archiveManager();
 	void miscOperations();
 	void about();

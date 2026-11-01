@@ -33,6 +33,7 @@ public:
 	void setFieldArchive(FieldArchive *fieldArchive);
 	void setOpcode(int opcode, bool show = false);
 	void setText(const QString &text);
+	void showScriptSearchInCurrentField(int module); // module: index of the Scripts combo
 	void setScriptExec(int groupID, int scriptID);
 	void updateRunSearch();
 

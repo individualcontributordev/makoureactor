@@ -64,6 +64,7 @@ public slots:
 private slots:
 	void adjustPasteAction();
 	void add();
+	void addGotoNewLabel();
 	void scriptEditor(bool modify = true);
 	void del(bool totalDel = true);
 	void cut();
@@ -118,7 +119,7 @@ private:
 
 	QBrush previousBG, previousErrorBg;
 
-	QAction *edit_A, *add_A, *del_A;
+	QAction *edit_A, *add_A, *addGoto_A, *del_A;
 	QAction *cut_A, *copy_A, *copyText_A, *paste_A;
 	QAction *up_A, *down_A, *expand_A;
 	QAction *undo_A, *redo_A, *text_A, *goto_A;
