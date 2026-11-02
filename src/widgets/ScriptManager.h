@@ -67,6 +67,11 @@ public slots:
 	void gotoScript(int grpScriptID, int scriptID);
 	void gotoOpcode(int grpScriptID, int scriptID, int opcodeID);
 private:
+	// Last group/script/opcode selected in each field, restored when it is shown again
+	struct Selection {
+		int grp = -1, script = -1, opcode = -1;
+	};
+	QHash<const Field *, Selection> _selections;
 	GrpScriptList *_groupScriptList;
 	ScriptList *_scriptList;
 	OpcodeList *_opcodeList;

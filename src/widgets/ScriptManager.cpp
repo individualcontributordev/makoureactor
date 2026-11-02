@@ -109,10 +109,19 @@ void ScriptManager::saveConfig()
 void ScriptManager::removeCopiedReferences()
 {
 	_groupScriptList->clearCopiedGroups();
+	// Called when the archive closes: its Field pointers are about to dangle
+	_selections.clear();
 }
 
 void ScriptManager::clear()
 {
+	if (_field != nullptr) {
+		const int grp = _groupScriptList->selectedID();
+		if (grp >= 0) {
+			_selections.insert(_field, {grp, _scriptList->selectedID(), _opcodeList->selectedID()});
+		}
+	}
+
 	_groupScriptList->blockSignals(true);
 	_scriptList->blockSignals(true);
 	_opcodeList->blockSignals(true);
@@ -142,6 +151,13 @@ void ScriptManager::fill(Field *field)
 		_groupScriptList->fill(_field->scriptsAndTexts());
 		_groupScriptList->blockSignals(false);
 		_groupScriptList->setEnabled(true);
+
+		const Selection sel = _selections.value(_field);
+		if (sel.grp >= 0) {
+			// No focus: keep it on the field list so arrow-key browsing continues
+			gotoScript(sel.grp, qMax(sel.script, 0));
+			_opcodeList->scroll(sel.opcode, false);
+		}
 	}
 }
 
