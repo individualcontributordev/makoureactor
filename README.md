@@ -42,6 +42,22 @@ Opcode list:
 
 ## Building
 
+### Windows (one step)
+
+Needs Git, Visual Studio 2022 (or Build Tools) with the C++ x64 workload, CMake, and a Qt 6 MSVC kit
+(not in vcpkg, install it with the Qt installer). zlib and ff7tk are fetched and built through the
+vcpkg submodule, so the first build needs network access and takes a while.
+
+```bat
+set QT_ROOT=C:\Qt\6.x.x\msvc2022_64
+build.bat
+run.bat
+```
+
+`build.bat` builds into `.build` and collects the exe, DLLs and Qt plugins into `.dist\app`; `run.bat` starts it from there.
+
+### Other platforms / manual
+
 Requirements: CMake, Qt 6.2+ (with Network), [zlib](http://www.zlib.net/), [ff7tk](https://www.github.com/sithlord48/ff7tk).
 
 ```sh
