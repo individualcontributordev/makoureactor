@@ -42,33 +42,29 @@ Opcode list:
 
 ## Building
 
-### Windows (one step)
+### Windows
 
-Needs Git, Visual Studio 2022 (or Build Tools) with the C++ x64 workload, CMake, and a Qt 6 MSVC kit
-(not in vcpkg, install it with the Qt installer). zlib and ff7tk are fetched and built through the
-vcpkg submodule, so the first build needs network access and takes a while.
+Needs Git, Visual Studio 2022 with the C++ x64 tools, and a Qt 6 MSVC kit (install via the Qt installer;
+it is not in vcpkg). zlib and ff7tk are built from the `vcpkg` submodule, so the first build needs network
+and takes a while.
 
 ```bat
-set QT_ROOT=C:\Qt\6.x.x\msvc2022_64
+set QT_ROOT=C:\Qt.x.x\msvc2022_64
 build.bat
 run.bat
 ```
 
-`build.bat` builds into `.build` and collects the exe, DLLs and Qt plugins into `.dist\app`; `run.bat` starts it from there.
+`build.bat` builds into `.build` and collects the exe, DLLs and Qt plugins into `.distpp`. `run.bat` launches it.
 
-### Other platforms / manual
+### Linux / macOS
 
-Requirements: CMake, Qt 6.2+ (with Network), [zlib](http://www.zlib.net/), [ff7tk](https://www.github.com/sithlord48/ff7tk).
+Needs CMake, Qt 6.2+ (with Network), [zlib](http://www.zlib.net/) and [ff7tk](https://www.github.com/sithlord48/ff7tk).
+Debian/Ubuntu: `apt-get install build-essential cmake qt6-base-dev qt6-tools-dev`. macOS: `brew install cmake qt6`.
 
 ```sh
-cmake -S . -B .dist/build -DCMAKE_INSTALL_PREFIX=.dist/install -DCMAKE_BUILD_TYPE=Release
-cmake --build .dist/build --config Release
-cmake --build .dist/build --target install
+cmake -S . -B .build -DCMAKE_BUILD_TYPE=Release
+cmake --build .build
 ```
-
-On Windows, use the MSVC 2022 64-bit Qt kit from a Visual Studio developer prompt (or open the folder in
-Qt Creator / Visual Studio). On Debian/Ubuntu: `apt-get install build-essential cmake qt6-base-dev qt6-tools-dev`.
-On macOS: `brew install cmake qt6`.
 
 ## Contributing
 

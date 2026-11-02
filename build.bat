@@ -1,9 +1,6 @@
 @echo off
 setlocal
-rem Builds Makou Reactor into .dist\app (run it with run.bat).
-rem Needs: Visual Studio 2022 (C++ tools), Git, and Qt 6 for MSVC 2022 64-bit.
-rem Set QT_ROOT to the Qt kit, e.g. set QT_ROOT=C:\Qt\6.8.0\msvc2022_64
-rem zlib and ff7tk are fetched and built by vcpkg (vcpkg.json); first build takes a while.
+rem Builds into .dist\app. Needs QT_ROOT (Qt MSVC kit), VS 2022 C++ tools and Git. See README.
 
 cd /d "%~dp0"
 
