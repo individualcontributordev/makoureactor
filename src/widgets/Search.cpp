@@ -387,7 +387,10 @@ void Search::setFieldArchive(FieldArchive *fieldArchive)
 	setActionsEnabled(fieldArchive != nullptr);
 	if (mapJump->count() <= 0 && fieldArchive != nullptr) {
 		int mapID = 0;
-		const QStringList &mapList = fieldArchive->mapList().mapNames();
+		// PS archives have no maplist file: use the built-in names, as the script editor does
+		const QStringList &mapList = fieldArchive->mapList().mapNames().isEmpty()
+		        ? Data::maplist(fieldArchive->isPC())
+		        : fieldArchive->mapList().mapNames();
 		for (const QString &fieldName : mapList) {
 			mapJump->addItem(QString("%1 - %2").arg(mapID++, 3, 10, QChar('0')).arg(fieldName));
 		}
@@ -900,8 +903,19 @@ void Search::setSearchValues()
 			Config::setValue("SearchedScript", e_script);
 			break;
 		case 4:
-			map = quint16(mapJump->currentIndex());
-			Config::setValue("SearchedMapJump", map);
+			{
+				// Editable combo: typed text leaves currentIndex at -1, so resolve it from the text
+				int index = mapJump->currentIndex();
+				if (index < 0) {
+					const QString typed = mapJump->currentText().trimmed();
+					index = typed.toInt(&ok);
+					if (!ok || index >= mapJump->count()) {
+						index = mapJump->findText(typed, Qt::MatchContains);
+					}
+				}
+				map = quint16(qMax(index, 0));
+				Config::setValue("SearchedMapJump", map);
+			}
 			break;
 		default:return;
 		}
